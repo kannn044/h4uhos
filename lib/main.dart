@@ -29,7 +29,7 @@ void main() {
         fontFamily: 'ThaiSansNeue',
         primarySwatch: Colors.pink,
       ),
-      title: 'Smart PHR',
+      title: 'Health for you',
       home: new SplashScreen(),
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
