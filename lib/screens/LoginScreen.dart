@@ -1,10 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:h4u/screens/HomeScreen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,7 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _ctrlEmail = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
-
 
   GoogleSignIn _googleSignIn = new GoogleSignIn(
     scopes: <String>[
@@ -79,20 +79,40 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     void _loginWithEmailPassword() async {
-      if(_email != null && _password != null) {
-        FirebaseUser user = await _auth.signInWithEmailAndPassword(email: _email, password: _password);
-        if (user != null) {
-          print(user);
-        } else {
+      if (_email != null && _password != null) {
+        try {
+          FirebaseUser user = await _auth.signInWithEmailAndPassword(
+              email: _email, password: _password);
+          if (user != null) {
+            print(user);
+            String uid = user.uid.toString();
+            var url =
+                "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
+            http.get(url).then((response) {
+              print(response.body);
+              if (response.statusCode == 200) {
+                var jsonResponse = json.decode(response.body);
+                print(jsonResponse['rows'][0]);
+                print(jsonResponse['rows'][0]['uid']);
+                print(jsonResponse['rows'][0]['first_name']);
+                print(jsonResponse['rows'][0]['last_name']);
 
+                Navigator.pushReplacement(
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) => new HomeScreen(user)),
+                );
+              }
+            });
+          } else {
+            print('login failed');
+          }
+        } catch (error) {
+          print('login failed');
         }
-        print('===========');
-        print(_email);
-        print(_password);
       } else {
-        print('xxxxxx');
+        print('login failed');
       }
-
     }
 
     Widget _loginPage = new ListView(
