@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _ctrlEmail = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
-
 
   GoogleSignIn _googleSignIn = new GoogleSignIn(
     scopes: <String>[
@@ -79,12 +81,33 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     void _loginWithEmailPassword() async {
-      if(_email != null && _password != null) {
-        FirebaseUser user = await _auth.signInWithEmailAndPassword(email: _email, password: _password);
-        if (user != null) {
-          print(user);
-        } else {
+      if (_email != null && _password != null) {
+        try {
+          FirebaseUser user = await _auth.signInWithEmailAndPassword(
+              email: _email, password: _password);
+          if (user != null) {
+            String uid = user.uid.toString();
+            var url = "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
 
+            print(user);
+
+            var response = await http.get(url);
+            if(response.statusCode == 200){
+              var jsonResponse = json.decode(response.body);
+              print(jsonResponse['rows'][0]['uid']);
+              print(jsonResponse['rows'][0]['first_name']);
+              print(jsonResponse['rows'][0]['last_name']);
+
+              Navigator.pushReplacement(
+                context,
+                new MaterialPageRoute(builder: (context) => new HomeScreen(user))
+              );
+            }
+          } else {
+            print('Login Failed');
+          }
+        } catch (error) {
+          print(error.toString());
         }
         print('===========');
         print(_email);
@@ -92,7 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         print('xxxxxx');
       }
-
     }
 
     Widget _loginPage = new ListView(

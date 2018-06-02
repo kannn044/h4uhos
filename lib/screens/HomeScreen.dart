@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:h4u/widgets/Dashboard.dart';
+import 'package:h4u/screens/Services.dart';
 
 class HomeScreen extends StatefulWidget {
   FirebaseUser _firebaseUser;
@@ -80,8 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             subtitle: Text('ดูประวัติการรับบริการที่สถานพยาบาลต่าง'),
             onTap: () {
-              // Update the state of the app
-              // ...
+              Navigator.push(
+                  context,
+                  new MaterialPageRoute(builder: (context) => new Services(_firebaseUser.uid))
+              );
             },
           ),
           new ListTile(
@@ -129,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget _settings = new ListView(
       children: <Widget>[
         ListTile(
-          leading: _firebaseUser != null
+          leading: _firebaseUser.photoUrl != null
               ? new CircleAvatar(
                   backgroundImage: NetworkImage(_firebaseUser.photoUrl),
                 )
@@ -138,11 +141,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: new Text('FA'),
                 ),
           title: new Text(
-            _firebaseUser != null ? _firebaseUser.displayName : "UNKNOW USER",
+            _firebaseUser.displayName
+             != null ? _firebaseUser.displayName : "UNKNOW USER",
             style: TextStyle(fontSize: 25.0),
           ),
           subtitle: new Text(
-              _firebaseUser != null ? _firebaseUser.email : "UNKNOW EMAIL",
+              _firebaseUser.email != null ? _firebaseUser.email : "UNKNOW EMAIL",
               style: TextStyle(fontSize: 18.0)),
           trailing: new PopupMenuButton<String>(
             onSelected: showMenuSelection,
