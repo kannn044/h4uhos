@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _ctrlEmail = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   GoogleSignIn _googleSignIn = new GoogleSignIn(
     scopes: <String>[
@@ -45,6 +46,18 @@ class _LoginScreenState extends State<LoginScreen> {
     _googleSignIn.signInSilently();
   }
 
+  void _showLoading() {
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//      duration: new Duration(seconds: 4),
+      content: new Row(
+        children: <Widget>[
+          new CircularProgressIndicator(),
+          new Text("  ล๊อกอินเข้าสู่โปรแกรม...")
+        ],
+      ),
+    ));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
 //      await _googleSignIn.signIn();
         GoogleSignInAccount googleUser = await _googleSignIn.signIn();
         GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+        _showLoading();
+
         FirebaseUser user = await _auth.signInWithGoogle(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -81,6 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
     void _loginWithEmailPassword() async {
       if (_email != null && _password != null) {
         try {
+
+          _showLoading();
+
           FirebaseUser user = await _auth.signInWithEmailAndPassword(
               email: _email, password: _password);
           if (user != null) {
@@ -92,11 +111,6 @@ class _LoginScreenState extends State<LoginScreen> {
               print(response.body);
               if (response.statusCode == 200) {
                 var jsonResponse = json.decode(response.body);
-                print(jsonResponse['rows'][0]);
-                print(jsonResponse['rows'][0]['uid']);
-                print(jsonResponse['rows'][0]['first_name']);
-                print(jsonResponse['rows'][0]['last_name']);
-
                 Navigator.pushReplacement(
                   context,
                   new MaterialPageRoute(
@@ -278,6 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     return Scaffold(
+      key: _scaffoldKey,
       body: _loginPage,
     );
   }
