@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:h4u/screens/HomeScreen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -29,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   GoogleSignInAccount _googleUser;
   FirebaseUser _firebaseUser;
+  UserUpdateInfo _updateUserInfo;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   verifyGoogle() async {
@@ -57,6 +56,18 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     ));
   }
+
+  void _showError(String message) {
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      duration: new Duration(seconds: 4),
+      content: new Row(
+        children: <Widget>[
+          new Text(message)
+        ],
+      ),
+    ));
+  }
+
 
   @override
   void initState() {
@@ -90,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (error) {
-        print(error);
+        _showError('ไม่สามารถเข้าสู่ระบบได้');
       }
     }
 
@@ -103,29 +114,19 @@ class _LoginScreenState extends State<LoginScreen> {
           FirebaseUser user = await _auth.signInWithEmailAndPassword(
               email: _email, password: _password);
           if (user != null) {
-            print(user);
-            String uid = user.uid.toString();
-            var url =
-                "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
-            http.get(url).then((response) {
-              print(response.body);
-              if (response.statusCode == 200) {
-                var jsonResponse = json.decode(response.body);
-                Navigator.pushReplacement(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) => new HomeScreen(user)),
-                );
-              }
-            });
+            Navigator.pushReplacement(
+              context,
+              new MaterialPageRoute(
+                  builder: (context) => new HomeScreen(user)),
+            );
           } else {
-            print('login failed');
+            _showError('ชื่อผู้ใช้งาน/รหัสผ่านไม่ถูกต้อง');
           }
         } catch (error) {
-          print('login failed');
+          _showError('เกิดข้อผิดพลาด');
         }
       } else {
-        print('login failed');
+        _showError('ข้อมูลไม่ครบ');
       }
     }
 
