@@ -138,22 +138,24 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                CircleAvatar(
-                  backgroundColor: Colors.green,
-                  radius: 50.0,
-                  child: Icon(Icons.notifications_active,
-                      color: Colors.white, size: 50.0),
-                ),
+                Image(image: AssetImage('assets/images/logo_small.png'),width: 100.0,),
                 Padding(
-                  padding: EdgeInsets.only(top: 10.0),
+                  padding: EdgeInsets.only(top: 15.0),
+                ),
+                Text(
+                  "Health for you.".toUpperCase(),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "สมุดสุขภาพประจำตัวประชาชน",
                   style: TextStyle(
                       color: Colors.black,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold),
-                )
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.normal),
+                ),
               ],
             ),
           ),
@@ -276,9 +278,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   'ลงทะเบียนขอใช้บริการ',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.green[900],
                     fontSize: 25.0,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w200,
                     letterSpacing: 0.3,
                   ),
                 ),

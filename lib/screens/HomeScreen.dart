@@ -130,52 +130,70 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget _settings;
     _settings = new ListView(
       children: <Widget>[
-        ListTile(
-          leading: _firebaseUser.photoUrl != null
-              ? new CircleAvatar(
-                  backgroundImage: NetworkImage(_firebaseUser.photoUrl),
-                )
-              : _userInfo != null
-                  ? CircleAvatar(
-                      backgroundColor: Colors.brown.shade800,
-                      child: new Text(
-                          '${_userInfo["first_name"][0].toUpperCase()}${_userInfo["last_name"][0].toUpperCase()}',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),))
-                  : CircleAvatar(
-                      backgroundColor: Colors.brown.shade800,
-                      child: new Text('UK')),
-          title: new Text(
-            _firebaseUser.displayName != null
-                ? _firebaseUser.displayName
+        new Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: ListTile(
+            leading: _firebaseUser.photoUrl != null
+                ? new CircleAvatar(
+                    backgroundImage: NetworkImage(_firebaseUser.photoUrl),
+                  )
                 : _userInfo != null
-                    ? '${_userInfo["first_name"]}  ${_userInfo["last_name"]}'
-                    : "UNKNOW USER",
-            style: TextStyle(fontSize: 25.0),
-          ),
-          subtitle: new Text(
-              _firebaseUser.email != null
-                  ? _firebaseUser.email
-                  : "UNKNOW EMAIL",
-              style: TextStyle(fontSize: 18.0)),
-          trailing: new PopupMenuButton<String>(
-            onSelected: showMenuSelection,
-            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                  const PopupMenuItem<String>(
-                      value: 'EDIT_PERSON',
-                      child: const Text(
-                        'แก้ไขข้อมูลส่วนตัว',
-                        style: TextStyle(fontSize: 20.0),
-                      )),
-                  const PopupMenuItem<String>(
-                      value: 'CHANGE_PASSWORD',
-                      child: const Text('เปลี่ยนรหัสผ่าน',
-                          style: TextStyle(fontSize: 20.0))),
-                  const PopupMenuItem<String>(
-                      value: 'SIGNOUT',
-                      child: const Text('ออกจากโปรแกรม',
-                          style: TextStyle(fontSize: 20.0))),
-                ],
+                    ? CircleAvatar(
+                        backgroundColor: Colors.brown.shade800,
+                        child: new Text(
+                            '${_userInfo["first_name"][0].toUpperCase()}${_userInfo["last_name"][0].toUpperCase()}',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),))
+                    : CircleAvatar(
+                        backgroundColor: Colors.brown.shade800,
+                        child: new Text('UK')),
+            title: new Text(
+              _firebaseUser.displayName != null
+                  ? _firebaseUser.displayName
+                  : _userInfo != null
+                      ? '${_userInfo["first_name"]}  ${_userInfo["last_name"]}'
+                      : "UNKNOW USER",
+              style: TextStyle(fontSize: 25.0),
+            ),
+            subtitle: new Text(
+                _firebaseUser.email != null
+                    ? _firebaseUser.email
+                    : "UNKNOW EMAIL",
+                style: TextStyle(fontSize: 18.0)),
+            trailing: new PopupMenuButton<String>(
+              onSelected: showMenuSelection,
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                    const PopupMenuItem<String>(
+                        value: 'EDIT_PERSON',
+                        child: ListTile(
+                          leading: Icon(Icons.edit),
+                          title: Text(
+                            'แก้ไขข้อมูลส่วนตัว',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                        )),
+                    const PopupMenuItem<String>(
+                        enabled: false,
+                        value: 'CHANGE_PASSWORD',
+                        child: ListTile(
+                          leading: Icon(Icons.vpn_key),
+                          title: Text(
+                            'เปลี่ยนรหัสผ่าน',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                        )),
+                    const PopupMenuItem<String>(
+                        value: 'SIGNOUT',
+                        child: ListTile(
+                          leading: Icon(Icons.exit_to_app),
+                          title: Text(
+                            'ออกจากแอพลิเคชัน',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                        )),
+                  ],
+            ),
           ),
         ),
+        Divider(),
         SwitchListTile(
           value: _isAlert,
           onChanged: (bool value) {
@@ -238,25 +256,6 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pushNamed('/activities/add');
               },
-            ),
-            PopupMenuButton<String>(
-              onSelected: mainMenuSelection,
-              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                const PopupMenuItem<String>(
-                    value: 'EDIT_PERSON',
-                    child: const Text(
-                      'ประวัติการบันทึกข้อมูล',
-                      style: TextStyle(fontSize: 20.0),
-                    )),
-                const PopupMenuItem<String>(
-                    value: 'CHANGE_PASSWORD',
-                    child: const Text('เปลี่ยนรหัสผ่าน',
-                        style: TextStyle(fontSize: 20.0))),
-                const PopupMenuItem<String>(
-                    value: 'SIGNOUT',
-                    child: const Text('ออกจากโปรแกรม',
-                        style: TextStyle(fontSize: 20.0))),
-              ],
             ),
           ],
         ),
