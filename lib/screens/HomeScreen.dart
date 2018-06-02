@@ -116,6 +116,17 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    void mainMenuSelection(String value) {
+      print(value);
+      if (value == 'SIGNOUT') {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+
+      if (value == 'ADD_ACTIVITIES') {
+        Navigator.of(context).pushNamed('/activities/add');
+      }
+    }
+
     Widget _settings;
     _settings = new ListView(
       children: <Widget>[
@@ -160,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(fontSize: 20.0))),
                   const PopupMenuItem<String>(
                       value: 'SIGNOUT',
-                      child: const Text('ออกจากโปรแกรม!',
+                      child: const Text('ออกจากโปรแกรม',
                           style: TextStyle(fontSize: 20.0))),
                 ],
           ),
@@ -221,6 +232,33 @@ class _HomeScreenState extends State<HomeScreen> {
     return new Scaffold(
         appBar: AppBar(
           title: Text('สมุดสุขภาพประจำตัวประชาชน'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.note_add),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/activities/add');
+              },
+            ),
+            PopupMenuButton<String>(
+              onSelected: mainMenuSelection,
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                const PopupMenuItem<String>(
+                    value: 'EDIT_PERSON',
+                    child: const Text(
+                      'ประวัติการบันทึกข้อมูล',
+                      style: TextStyle(fontSize: 20.0),
+                    )),
+                const PopupMenuItem<String>(
+                    value: 'CHANGE_PASSWORD',
+                    child: const Text('เปลี่ยนรหัสผ่าน',
+                        style: TextStyle(fontSize: 20.0))),
+                const PopupMenuItem<String>(
+                    value: 'SIGNOUT',
+                    child: const Text('ออกจากโปรแกรม',
+                        style: TextStyle(fontSize: 20.0))),
+              ],
+            ),
+          ],
         ),
         body: new PageView(
             children: [
@@ -251,12 +289,10 @@ class _HomeScreenState extends State<HomeScreen> {
             /// Will be used to scroll to the next page
             /// using the _pageController
             onTap: navigationTapped,
-            currentIndex: _page));
+            currentIndex: _page)
+    );
   }
 
-  /// Called when the user presses on of the
-  /// [BottomNavigationBarItem] with corresponding
-  /// page index
   void navigationTapped(int page) {
     // Animating to the page.
     // You can use whatever duration and curve you like

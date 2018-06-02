@@ -7,6 +7,7 @@ import 'package:h4u/screens/Hospitals.dart';
 import 'package:h4u/screens/RegisterScreen.dart';
 import 'package:h4u/screens/InfoScreen.dart';
 import 'package:h4u/screens/HospitalRegister.dart';
+import 'package:h4u/screens/AddActivities.dart';
 
 void main() {
   runApp(
@@ -31,6 +32,8 @@ void main() {
         '/info': (BuildContext context) => new InfoScreen(),
         '/hospital': (BuildContext context) => new Hospitals(),
         '/hospital/register': (BuildContext context) => new HospitalRegister(),
+        '/activities/add': (BuildContext context) => new AddActivities(),
+
       },
     ),
   );
