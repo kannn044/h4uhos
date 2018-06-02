@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:h4u/screens/Services.dart';
 import 'package:h4u/widgets/Dashboard.dart';
 
@@ -19,18 +20,32 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   FirebaseUser _firebaseUser;
+  Map _userInfo;
+
   PageController _pageController;
   String barcode = "";
-
-  /// Indicating the current displayed page
-  /// 0: home
-  /// 1: notify
-  /// 2: setting
-  ///
   int _page = 0;
-  Future<String> _barcodeString;
 
   _HomeScreenState(this._firebaseUser);
+
+  void _getUserInfo() async {
+    String uid = this._firebaseUser.uid.toString();
+    var url = "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body);
+      if (jsonResponse["ok"]) {
+        print(jsonResponse["rows"][0]);
+        if (jsonResponse["rows"][0] != null) {
+          setState(() {
+            _userInfo = jsonResponse["rows"][0];
+            print(_userInfo);
+          });
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -38,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+
+    _getUserInfo();
 
     _pageController = new PageController();
   }
@@ -50,28 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future scan() async {
-      try {
-        String barcode = await BarcodeScanner.scan();
-        setState(() => this.barcode = barcode);
-      } on PlatformException catch (e) {
-        if (e.code == BarcodeScanner.CameraAccessDenied) {
-          setState(() {
-            this.barcode = 'The user did not grant the camera permission!';
-          });
-        } else {
-          setState(() => this.barcode = 'Unknown error: $e');
-        }
-      } on FormatException {
-        setState(() => this.barcode =
-            'null (User returned using the "back"-button before scanning anything. Result)');
-      } catch (e) {
-        setState(() => this.barcode = 'Unknown error: $e');
-      }
-    }
-
-    Widget _service;
-    _service = Scaffold(
+    Widget _service = Scaffold(
       body: ListView(
         children: <Widget>[
           new ListTile(
@@ -82,11 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             subtitle: Text('ดูประวัติการรับบริการที่สถานพยาบาลต่าง'),
             onTap: () {
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) => new Services(_firebaseUser.uid)),
-                );
+              Navigator.push(
+                context,
+                new MaterialPageRoute(
+                    builder: (context) => new Services(_firebaseUser.uid)),
+              );
             },
           ),
           new ListTile(
@@ -95,7 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
               'ระบบคิวออนไลน์',
               style: new TextStyle(fontSize: 25.0),
             ),
-            trailing: new Icon(Icons.brightness_1, size: 8.0, color: Colors.redAccent),
+            trailing: new Icon(Icons.brightness_1,
+                size: 8.0, color: Colors.redAccent),
             subtitle: Text('ตรวจสอบคิว/จองคิวล่วงหน้า'),
             onTap: () {
               // Update the state of the app
@@ -104,19 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-//      floatingActionButton: FloatingActionButton(
-//        tooltip: 'เพิ่มการร้องขอ',
-//        child: Icon(Icons.add_a_photo),
-//        onPressed: () {
-//          // no action
-//          scan();
-//        },
-//      ),
     );
-
-//    Widget _dashboard = new ListView(
-//      children: <Widget>[Text('Dashboard')],
-//    );
 
     var _isAlert = false;
 
@@ -139,16 +124,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ? new CircleAvatar(
                   backgroundImage: NetworkImage(_firebaseUser.photoUrl),
                 )
-              : CircleAvatar(
-                  backgroundColor: Colors.brown.shade800,
-                  child: new Text('FA'),
-                ),
+              : _userInfo != null
+                  ? CircleAvatar(
+                      backgroundColor: Colors.brown.shade800,
+                      child: new Text(
+                          '${_userInfo["first_name"][0].toUpperCase()}${_userInfo["last_name"][0].toUpperCase()}',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),))
+                  : CircleAvatar(
+                      backgroundColor: Colors.brown.shade800,
+                      child: new Text('UK')),
           title: new Text(
-            _firebaseUser.displayName != null ? _firebaseUser.displayName : "UNKNOW USER",
+            _firebaseUser.displayName != null
+                ? _firebaseUser.displayName
+                : _userInfo != null
+                    ? '${_userInfo["first_name"]}  ${_userInfo["last_name"]}'
+                    : "UNKNOW USER",
             style: TextStyle(fontSize: 25.0),
           ),
           subtitle: new Text(
-              _firebaseUser.email != null ? _firebaseUser.email : "UNKNOW EMAIL",
+              _firebaseUser.email != null
+                  ? _firebaseUser.email
+                  : "UNKNOW EMAIL",
               style: TextStyle(fontSize: 18.0)),
           trailing: new PopupMenuButton<String>(
             onSelected: showMenuSelection,
@@ -170,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
           ),
         ),
-
         SwitchListTile(
           value: _isAlert,
           onChanged: (bool value) {
@@ -178,7 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _isAlert = value;
             });
           },
-//          secondary: const Icon(Icons.lightbulb_outline),
           title: new Text(
             "รับการแจ้งเตือนจากระบบ",
             style: TextStyle(fontSize: 23.0),
@@ -186,14 +179,16 @@ class _HomeScreenState extends State<HomeScreen> {
           subtitle: new Text("แจ้งเตือนเมื่อมีข่าวสาร หรือ ข้อมูลจากโรงพยาบาล"),
         ),
         ListTile(
-          title: new Text("ยกเลิกการใช้บริการ",
+          title: new Text(
+            "ยกเลิกการใช้บริการ",
             style: TextStyle(fontSize: 23.0),
           ),
           subtitle: new Text("ยกเลิกการใช้งานแอพลิเคชั่นนี้",
               style: TextStyle(fontSize: 18.0)),
         ),
         ListTile(
-          title: new Text("สถานพยาบาลที่ลงทะเบียน",
+          title: new Text(
+            "สถานพยาบาลที่ลงทะเบียน",
             style: TextStyle(fontSize: 23.0),
           ),
           subtitle: new Text("เพิ่ม/ลบ สถานพยาบาลที่ให้บริการ",
@@ -204,15 +199,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Divider(),
         ListTile(
-          title: new Text("สำรองข้อมูลบนคลาวด์",
+          title: new Text(
+            "สำรองข้อมูลบนคลาวด์",
             style: TextStyle(fontSize: 23.0),
           ),
           subtitle: new Text("ล่าสุดเมื่อ 2018-05-01 12:00",
               style: TextStyle(fontSize: 18.0)),
         ),
         ListTile(
-          title: new Text("ลบข้อมูลในเครื่อง",
-            style: TextStyle(fontSize: 23.0, color: Colors.red, fontWeight: FontWeight.bold),
+          title: new Text(
+            "ลบข้อมูลในเครื่อง",
+            style: TextStyle(
+                fontSize: 23.0, color: Colors.red, fontWeight: FontWeight.bold),
           ),
           subtitle: new Text("ลบข้อมูลที่บันทึกไว้ในเครื่องออกทั้งหมด",
               style: TextStyle(fontSize: 18.0)),
