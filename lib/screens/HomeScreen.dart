@@ -6,6 +6,10 @@ import 'dart:convert';
 
 import 'package:h4u/screens/Services.dart';
 import 'package:h4u/widgets/Dashboard.dart';
+import 'package:h4u/screens/Services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   FirebaseUser _firebaseUser;
@@ -16,7 +20,10 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => new _HomeScreenState(this._firebaseUser);
 }
 
+String _profiles;
+
 class _HomeScreenState extends State<HomeScreen> {
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   FirebaseUser _firebaseUser;
   Map _userInfo;
 
@@ -55,6 +62,50 @@ class _HomeScreenState extends State<HomeScreen> {
     _getUserInfo();
 
     _pageController = new PageController();
+
+    ///firebase_massaging
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) {
+        print("onMessage: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) {
+        print("onResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      setState(() {
+        print("Push Messaging token: $token");
+        _pushToken(token);
+      });
+    });
+  }
+
+  void _pushToken(String token) async{
+    var url = "http://203.157.102.103/api/phr/v1/noti";
+    var params = {
+      "token": token ?? '',
+      "uid": this._firebaseUser.uid ?? ''
+    };
+
+    print(params);
+    var response = await http.post(url,body: params);
+
+    if(response.statusCode == 200){
+      var jsonResponse = json.decode(response.body);
+      print(jsonResponse);
+    }else{
+      print('error');
+    }
   }
 
   @override
