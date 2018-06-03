@@ -1,12 +1,5 @@
-import 'dart:async';
-import 'dart:convert' show json;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-import "package:http/http.dart" as http;
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:h4u/screens/LoginScreen.dart';
 import 'package:h4u/screens/SplashScreen.dart';
@@ -15,6 +8,7 @@ import 'package:h4u/screens/RegisterScreen.dart';
 import 'package:h4u/screens/InfoScreen.dart';
 import 'package:h4u/screens/HospitalRegister.dart';
 import 'package:h4u/screens/Services.dart';
+import 'package:h4u/screens/AddActivities.dart';
 
 void main() {
   runApp(
@@ -30,7 +24,7 @@ void main() {
         fontFamily: 'ThaiSansNeue',
         primarySwatch: Colors.pink,
       ),
-      title: 'Smart PHR',
+      title: 'Health for you',
       home: new SplashScreen(),
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
@@ -39,48 +33,9 @@ void main() {
         '/info': (BuildContext context) => new InfoScreen(),
         '/hospital': (BuildContext context) => new Hospitals(),
         '/hospital/register': (BuildContext context) => new HospitalRegister(),
+        '/activities/add': (BuildContext context) => new AddActivities(),
+
       },
     ),
-
   );
 }
-
-//
-//
-//class SmartPhr extends StatefulWidget {
-//  @override
-//  State createState() => new SmartPhrState();
-//}
-//
-//class SmartPhrState extends State<SmartPhr> {
-//
-//  String _currentUser;
-//
-////  Future<Null> _handleSignOut() async {
-////    _googleSignIn.disconnect();
-////    setState(() {
-////      _currentPage = "LOGINPAGE";
-////    });
-////  }
-//
-//  @override
-//  void initState() {
-//    // TODO: implement initState
-//    super.initState();
-////    startTime();
-//  }
-//
-////  startTime() async {
-////    var _duration = new Duration(seconds: 2);
-////    return new Timer(_duration, navigationPage);
-////  }
-//
-//  void navigationPage() {
-//    Navigator.of(context).pushReplacementNamed('/login');
-//  }
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return Container();
-//  }
-//}
