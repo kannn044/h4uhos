@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:h4u/screens/HomeScreen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -18,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _ctrlEmail = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   GoogleSignIn _googleSignIn = new GoogleSignIn(
     scopes: <String>[
@@ -28,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   GoogleSignInAccount _googleUser;
   FirebaseUser _firebaseUser;
+  UserUpdateInfo _updateUserInfo;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   verifyGoogle() async {
@@ -44,6 +44,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
     _googleSignIn.signInSilently();
   }
+
+  void _showLoading() {
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+//      duration: new Duration(seconds: 4),
+      content: new Row(
+        children: <Widget>[
+          new CircularProgressIndicator(),
+          new Text("  ล๊อกอินเข้าสู่โปรแกรม...")
+        ],
+      ),
+    ));
+  }
+
+  void _showError(String message) {
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      duration: new Duration(seconds: 4),
+      content: new Row(
+        children: <Widget>[
+          new Text(message)
+        ],
+      ),
+    ));
+  }
+
 
   @override
   void initState() {
@@ -62,6 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
 //      await _googleSignIn.signIn();
         GoogleSignInAccount googleUser = await _googleSignIn.signIn();
         GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+        _showLoading();
+
         FirebaseUser user = await _auth.signInWithGoogle(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -74,44 +101,32 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (error) {
-        print(error);
+        _showError('ไม่สามารถเข้าสู่ระบบได้');
       }
     }
 
     void _loginWithEmailPassword() async {
       if (_email != null && _password != null) {
         try {
+
+          _showLoading();
+
           FirebaseUser user = await _auth.signInWithEmailAndPassword(
               email: _email, password: _password);
           if (user != null) {
-            print(user);
-            String uid = user.uid.toString();
-            var url =
-                "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
-            http.get(url).then((response) {
-              print(response.body);
-              if (response.statusCode == 200) {
-                var jsonResponse = json.decode(response.body);
-                print(jsonResponse['rows'][0]);
-                print(jsonResponse['rows'][0]['uid']);
-                print(jsonResponse['rows'][0]['first_name']);
-                print(jsonResponse['rows'][0]['last_name']);
-
-                Navigator.pushReplacement(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) => new HomeScreen(user)),
-                );
-              }
-            });
+            Navigator.pushReplacement(
+              context,
+              new MaterialPageRoute(
+                  builder: (context) => new HomeScreen(user)),
+            );
           } else {
-            print('login failed');
+            _showError('ชื่อผู้ใช้งาน/รหัสผ่านไม่ถูกต้อง');
           }
         } catch (error) {
-          print('login failed');
+          _showError('เกิดข้อผิดพลาด');
         }
       } else {
-        print('login failed');
+        _showError('ข้อมูลไม่ครบ');
       }
     }
 
@@ -123,22 +138,24 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                CircleAvatar(
-                  backgroundColor: Colors.green,
-                  radius: 50.0,
-                  child: Icon(Icons.notifications_active,
-                      color: Colors.white, size: 50.0),
-                ),
+                Image(image: AssetImage('assets/images/logo_small.png'),width: 100.0,),
                 Padding(
-                  padding: EdgeInsets.only(top: 10.0),
+                  padding: EdgeInsets.only(top: 15.0),
+                ),
+                Text(
+                  "Health for you.".toUpperCase(),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "สมุดสุขภาพประจำตัวประชาชน",
                   style: TextStyle(
                       color: Colors.black,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold),
-                )
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.normal),
+                ),
               ],
             ),
           ),
@@ -261,9 +278,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   'ลงทะเบียนขอใช้บริการ',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.green[900],
                     fontSize: 25.0,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w200,
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -278,6 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     return Scaffold(
+      key: _scaffoldKey,
       body: _loginPage,
     );
   }
