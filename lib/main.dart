@@ -7,6 +7,7 @@ import 'package:h4u/screens/Hospitals.dart';
 import 'package:h4u/screens/RegisterScreen.dart';
 import 'package:h4u/screens/InfoScreen.dart';
 import 'package:h4u/screens/HospitalRegister.dart';
+import 'package:h4u/screens/Services.dart';
 import 'package:h4u/screens/AddActivities.dart';
 
 void main() {

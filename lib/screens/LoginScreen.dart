@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -108,6 +112,25 @@ class _LoginScreenState extends State<LoginScreen> {
     void _loginWithEmailPassword() async {
       if (_email != null && _password != null) {
         try {
+          FirebaseUser user = await _auth.signInWithEmailAndPassword(
+              email: _email, password: _password);
+          if (user != null) {
+            String uid = user.uid.toString();
+            var url = "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
+
+            var response = await http.get(url);
+            if(response.statusCode == 200){
+              var jsonResponse = json.decode(response.body);
+              Navigator.pushReplacement(
+                context,
+                new MaterialPageRoute(builder: (context) => new HomeScreen(user))
+              );
+            }
+          } else {
+            print('Login Failed');
+          }
+        } catch (error) {
+          print(error.toString());
 
           _showLoading();
 
