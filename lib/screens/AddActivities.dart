@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class AddActivities extends StatefulWidget {
@@ -12,6 +14,11 @@ class _AddActivitiesState extends State<AddActivities> {
   double _fbs = 100.0;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     final slider = new Padding(
@@ -19,9 +26,15 @@ class _AddActivitiesState extends State<AddActivities> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          new Text('ความดันโลหิตบน (มม. ปรอท)',  style: TextStyle(fontSize: 20.0),),
+          new Text(
+            'ความดันโลหิตบน (มม. ปรอท)',
+            style: TextStyle(fontSize: 20.0),
+          ),
           new ListTile(
-            trailing: Text('${_bpS.round()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+            trailing: Text(
+              '${_bpS.round()}',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),
+            ),
             title: Slider(
               min: 20.0,
               max: 500.0,
@@ -35,9 +48,15 @@ class _AddActivitiesState extends State<AddActivities> {
             ),
           ),
 //          Divider(),
-          new Text('ความดันโลหิตล่าง (มม. ปรอท)',  style: TextStyle(fontSize: 20.0),),
+          new Text(
+            'ความดันโลหิตล่าง (มม. ปรอท)',
+            style: TextStyle(fontSize: 20.0),
+          ),
           new ListTile(
-            trailing: Text('${_bpD.round()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+            trailing: Text(
+              '${_bpD.round()}',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),
+            ),
             title: Slider(
               min: 20.0,
               max: 500.0,
@@ -50,9 +69,15 @@ class _AddActivitiesState extends State<AddActivities> {
               },
             ),
           ),
-          new Text('ระดับน้ำตาลในเลือก (มก./ดล.)',  style: TextStyle(fontSize: 20.0),),
+          new Text(
+            'ระดับน้ำตาลในเลือก (มก./ดล.)',
+            style: TextStyle(fontSize: 20.0),
+          ),
           new ListTile(
-            trailing: Text('${_fbs.round()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+            trailing: Text(
+              '${_fbs.round()}',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),
+            ),
             title: Slider(
               min: 20.0,
               max: 500.0,
@@ -83,7 +108,11 @@ class _AddActivitiesState extends State<AddActivities> {
                 ),
                 Expanded(
                   child: IconButton(
-                    icon: Icon(Icons.important_devices,size: 40.0, color: Colors.green,),
+                    icon: Icon(
+                      Icons.important_devices,
+                      size: 40.0,
+                      color: Colors.green,
+                    ),
                     tooltip: 'อ่านจากอุปกรณ์',
                     onPressed: () {},
                   ),
@@ -106,23 +135,22 @@ class _AddActivitiesState extends State<AddActivities> {
                     maxLength: 3,
                   ),
                 ),
-                SizedBox(width: 10.0,),
+                SizedBox(
+                  width: 10.0,
+                ),
                 new Expanded(
                   child: TextField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                         labelText: 'ส่วนสูง',
                         helperText: 'ซม.',
-                        labelStyle: TextStyle(fontSize: 20.0)
-                    ),
+                        labelStyle: TextStyle(fontSize: 20.0)),
                     maxLength: 3,
                   ),
                 ),
-
               ],
             ),
           ),
-
         ],
       ),
     );
@@ -133,7 +161,8 @@ class _AddActivitiesState extends State<AddActivities> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {},
+            tooltip: 'บันทึก',
+            onPressed: () {  },
           )
         ],
       ),

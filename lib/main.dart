@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ import 'package:h4u/screens/InfoScreen.dart';
 import 'package:h4u/screens/HospitalRegister.dart';
 import 'package:h4u/screens/AddActivities.dart';
 
-void main() {
+void main() async {
   runApp(
     new MaterialApp(
       localizationsDelegates: [
@@ -17,9 +18,10 @@ void main() {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-        supportedLocales: [
-        const Locale('th', 'TH'),],
-    theme: ThemeData(
+      supportedLocales: [
+        const Locale('th', 'TH'),
+      ],
+      theme: ThemeData(
         fontFamily: 'ThaiSansNeue',
         primarySwatch: Colors.pink,
       ),
@@ -33,7 +35,6 @@ void main() {
         '/hospital': (BuildContext context) => new Hospitals(),
         '/hospital/register': (BuildContext context) => new HospitalRegister(),
         '/activities/add': (BuildContext context) => new AddActivities(),
-
       },
     ),
   );
