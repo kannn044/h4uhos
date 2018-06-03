@@ -200,16 +200,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
     void _saveRegister() async {
       var url = 'http://203.157.102.103/api/phr/v1/user/register/email';
-      var params = {
-        'email' = _email ?? '',
-        'password' = _password ?? '',
-        'cid' = _cid ?? '',
-        'first_name' = _firstname ?? '',
-        'last_name' = _lastname ?? '',
-        'birth_date' = _birthdate ?? '',
-        'tel' = _tel ?? '',
-        'sex' = _sex == 'ชาย' ? 'male' : 'female'
-      };
+      var params = Map();
+      params['email'] = _email;
+      params['password'] = _password;
+      params['cid'] = _cid;
+      params['first_name'] = _firstname;
+      params['last_name'] = _lastname;
+      params['birth_date'] = _birthdate;
+      params['tel'] = _tel;
+      params['sex'] = _sex == 'ชาย' ? 'male' : 'female';
 
       var response = await http.post(url, body: params);
       if(response.statusCode == 200) {

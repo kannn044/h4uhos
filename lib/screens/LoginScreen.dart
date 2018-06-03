@@ -89,15 +89,9 @@ class _LoginScreenState extends State<LoginScreen> {
             String uid = user.uid.toString();
             var url = "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
 
-            print(user);
-
             var response = await http.get(url);
             if(response.statusCode == 200){
               var jsonResponse = json.decode(response.body);
-              print(jsonResponse['rows'][0]['uid']);
-              print(jsonResponse['rows'][0]['first_name']);
-              print(jsonResponse['rows'][0]['last_name']);
-
               Navigator.pushReplacement(
                 context,
                 new MaterialPageRoute(builder: (context) => new HomeScreen(user))
