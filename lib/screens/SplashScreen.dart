@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                  color: Colors.pinkAccent
+                  color: Colors.teal
               ),
             ),
             Column(
@@ -48,21 +48,16 @@ class _SplashScreenState extends State<SplashScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 50.0,
-                          child: Icon(
-                              Icons.local_activity,
-                              color: Colors.greenAccent,
-                              size: 50.0
-                          ),
-
-                        ),
+                        Image(image: AssetImage('assets/images/logo_small.png'),width: 100.0,),
                         Padding(padding: EdgeInsets.only(top: 10.0),),
                         Text("HEALTH FOR YOU", style: TextStyle(
                             color: Colors.white,
                             fontSize: 24.0,
                             fontWeight: FontWeight.bold
+                        ),),
+                        Text("สำหรับโรงพยาบาล", style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22.0
                         ),)
                       ],
                     ),

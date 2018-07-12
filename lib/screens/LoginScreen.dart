@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:h4u/screens/HomeScreen.dart';
+import 'package:h4u/screens/HomeScreenHos.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -21,33 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _ctrlEmail = new TextEditingController();
   final TextEditingController _ctrlPassword = new TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  GoogleSignIn _googleSignIn = new GoogleSignIn(
-    scopes: <String>[
-      'profile',
-      'email',
-    ],
-  );
-
-  GoogleSignInAccount _googleUser;
-  FirebaseUser _firebaseUser;
-  UserUpdateInfo _updateUserInfo;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  verifyGoogle() async {
-    _googleSignIn.onCurrentUserChanged
-        .listen((GoogleSignInAccount account) async {
-      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      FirebaseUser user = await _auth.signInWithGoogle(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-    });
-
-    _googleSignIn.signInSilently();
-  }
 
   void _showLoading() {
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -65,13 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
       duration: new Duration(seconds: 4),
       content: new Row(
-        children: <Widget>[
-          new Text(message)
-        ],
+        children: <Widget>[new Text(message)],
       ),
     ));
   }
-
 
   @override
   void initState() {
@@ -79,247 +45,192 @@ class _LoginScreenState extends State<LoginScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-
-    _googleSignIn.disconnect();
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<Null> _handleSignIn() async {
-      try {
-//      await _googleSignIn.signIn();
-        GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-        GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-        _showLoading();
-
-        FirebaseUser user = await _auth.signInWithGoogle(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        if (user != null) {
-          Navigator.pushReplacement(
-            context,
-            new MaterialPageRoute(builder: (context) => new HomeScreen(user)),
-          );
-        }
-      } catch (error) {
-        _showError('ไม่สามารถเข้าสู่ระบบได้');
-      }
-    }
-
     void _loginWithEmailPassword() async {
       if (_email != null && _password != null) {
         try {
-          FirebaseUser user = await _auth.signInWithEmailAndPassword(
-              email: _email, password: _password);
-          if (user != null) {
-            String uid = user.uid.toString();
-            var url = "http://203.157.102.103/api/phr/v1/user/profiles?uid=$uid";
+          var url = "http://203.157.102.103:443/api/phr/v1/hospital/login";
+          var params = {"username": _email ?? '', "password": _password ?? ''};
 
-            var response = await http.get(url);
-            if(response.statusCode == 200){
-              var jsonResponse = json.decode(response.body);
+          var response = await http.post(url, body: params);
+
+          if (response.statusCode == 200) {
+            var jsonResponse = json.decode(response.body);
+            if (jsonResponse["ok"]) {
               Navigator.pushReplacement(
-                context,
-                new MaterialPageRoute(builder: (context) => new HomeScreen(user))
-              );
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) =>
+                          new HomeScreenHos(jsonResponse["hcode"], _email)));
+            } else {
+              _showError("Email หรือ Password ไม่ถูกต้อง!");
             }
           } else {
-            print('Login Failed');
+            print('error');
           }
         } catch (error) {
           print(error.toString());
-
-          _showLoading();
-
-          FirebaseUser user = await _auth.signInWithEmailAndPassword(
-              email: _email, password: _password);
-          if (user != null) {
-            Navigator.pushReplacement(
-              context,
-              new MaterialPageRoute(
-                  builder: (context) => new HomeScreen(user)),
-            );
-          } else {
-            _showError('ชื่อผู้ใช้งาน/รหัสผ่านไม่ถูกต้อง');
-          }
-        } catch (error) {
-          _showError('เกิดข้อผิดพลาด');
         }
       } else {
         _showError('ข้อมูลไม่ครบ');
       }
     }
 
-    Widget _loginPage = new ListView(
-      children: <Widget>[
-        new Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Image(image: AssetImage('assets/images/logo_small.png'),width: 100.0,),
-                Padding(
-                  padding: EdgeInsets.only(top: 15.0),
-                ),
-                Text(
-                  "Health for you.".toUpperCase(),
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "สมุดสุขภาพประจำตัวประชาชน",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.normal),
-                ),
-              ],
-            ),
-          ),
-        ),
-        new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-//            new Padding(
-//              padding: const EdgeInsets.all(20.0),
-//              child: const Text(
-//                "เข้าสู่ระบบเพื่อใช้งานโปรแกรม",
-//                style: TextStyle(fontSize: 30.0),
-//              ),
-//            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
-              child: new TextField(
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                    fontFamily: 'ThaiSansNeue'),
-                decoration: new InputDecoration(
-                    labelStyle: TextStyle(fontSize: 20.0),
-                    labelText: 'อีเมล์',
-                    icon: Icon(Icons.email),
-//                helperText: 'ระบุอีเมล์ผู้ใช้งาน',
-                    filled: false),
-                keyboardType: TextInputType.emailAddress,
-                controller: _ctrlEmail,
-                onChanged: (String value) {
-                  _email = value;
-                },
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
-              child: new TextField(
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                    fontFamily: 'ThaiSansNeue'),
-                decoration: new InputDecoration(
-                  labelText: 'รหัสผ่าน',
-                  labelStyle: TextStyle(fontSize: 20.0),
-                  icon: Icon(Icons.vpn_key),
-//                  helperText: 'รหัสผ่าน'
-                ),
-                obscureText: true,
-                controller: _ctrlPassword,
-                onChanged: (String value) {
-                  _password = value;
-                },
-              ),
-            ),
-            SizedBox(
-              height: 24.0,
-            ),
-            Column(
-              children: <Widget>[
-                Material(
-                  borderRadius: BorderRadius.all(const Radius.circular(30.0)),
-                  shadowColor: Colors.redAccent.shade100,
-                  elevation: 5.0,
-                  child: MaterialButton(
-                    minWidth: 300.0,
-                    height: 60.0,
-                    onPressed: () {
-                      _loginWithEmailPassword();
-                    },
-                    color: Colors.red,
-                    child: Text(
-                      'ล๊อกอินเข้าใช้งาน',
-                      style: new TextStyle(
-                        color: Colors.white,
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            Column(
-              children: <Widget>[
-                Material(
-                  borderRadius: BorderRadius.all(const Radius.circular(30.0)),
-                  shadowColor: Colors.lightBlueAccent.shade100,
-                  elevation: 5.0,
-                  child: MaterialButton(
-                    minWidth: 300.0,
-                    height: 60.0,
-                    onPressed: () {
-                      _handleSignIn()
-                          .then((FirebaseUser user) => {})
-                          .catchError((e) => print(e));
-                    },
-                    color: Colors.blue,
-                    child: new Text(
-                      "ล๊อกอินด้วย Google",
-                      style: new TextStyle(
-                        color: Colors.white,
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: FlatButton(
-                child: Text(
-                  'ลงทะเบียนขอใช้บริการ',
-                  style: TextStyle(
-                    color: Colors.green[900],
-                    fontSize: 25.0,
-                    fontWeight: FontWeight.w200,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/register');
-                },
-              ),
-            )
-          ],
-        ),
-      ],
-    );
-
     return Scaffold(
-      key: _scaffoldKey,
-      body: _loginPage,
-    );
+        key: _scaffoldKey,
+        body: Stack(fit: StackFit.expand, children: <Widget>[
+          Container(
+            decoration: BoxDecoration(color: Colors.teal),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                flex: 3,
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image(
+                        image: AssetImage('assets/images/logo_small.png'),
+                        width: 100.0,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 0.0),
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      Text(
+                        'ลงชื่อเข้าใช้งาน',
+                        style: TextStyle(
+                            fontSize: 26.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'สำหรับโรงพยาบาล',
+                        style: TextStyle(fontSize: 22.0, color: Colors.white),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5.0, horizontal: 30.0),
+                        child: new TextField(
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.white,
+                              fontFamily: 'ThaiSansNeue'),
+                          decoration: new InputDecoration(
+                              fillColor: Colors.white,
+                              labelStyle: TextStyle(
+                                  fontSize: 20.0, color: Colors.white),
+                              labelText: 'อีเมล์',
+                              icon: Icon(
+                                Icons.email,
+                                color: Colors.white,
+                              ),
+//                helperText: 'ระบุอีเมล์ผู้ใช้งาน',
+                              filled: false),
+                          keyboardType: TextInputType.emailAddress,
+                          controller: _ctrlEmail,
+                          onChanged: (String value) {
+                            _email = value;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5.0, horizontal: 30.0),
+                        child: new TextField(
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.white,
+                              fontFamily: 'ThaiSansNeue'),
+                          decoration: new InputDecoration(
+                            labelText: 'รหัสผ่าน',
+                            labelStyle:
+                                TextStyle(fontSize: 20.0, color: Colors.white),
+                            icon: Icon(
+                              Icons.vpn_key,
+                              color: Colors.white,
+                            ),
+//                  helperText: 'รหัสผ่าน'
+                          ),
+                          obscureText: true,
+                          controller: _ctrlPassword,
+                          onChanged: (String value) {
+                            _password = value;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 24.0,
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Material(
+                            borderRadius:
+                                BorderRadius.all(const Radius.circular(30.0)),
+                            shadowColor: Colors.redAccent.shade100,
+                            elevation: 5.0,
+                            child: MaterialButton(
+                              minWidth: 250.0,
+                              height: 55.0,
+                              onPressed: () {
+                                _loginWithEmailPassword();
+                              },
+                              color: Colors.greenAccent,
+                              child: Text(
+                                'เข้าสู่ระบบ',
+                                style: new TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.w300,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                      ),
+                      Text(
+                        "สมุดสุขภาพประชาชน",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร",
+                        style: TextStyle(color: Colors.white, fontSize: 16.0),
+                      ),
+                      Text(
+                        "สำนักงานปลัดกระทรวงสาธารณสุข กระทรวงสาธารณสุข",
+                        style: TextStyle(color: Colors.white, fontSize: 16.0),
+                      )
+                    ],
+                  ))
+            ],
+          )
+        ]));
   }
 }
